@@ -75,7 +75,7 @@
     <div id="setup-panel">
         <h1 style="color: var(--red-team); margin: 10px 0; letter-spacing: 2px;">MAFIA PRO</h1>
         
-        <button class="roles-btn" onclick="showRolesCatalog()">🎭 ԴԵՐԵՐ (Ցանկ)</button>
+        <button class="roles-btn" onclick="showRolesCatalog('setup-panel')">🎭 ԴԵՐԵՐ (Ցանկ)</button>
 
         <div style="background: #222; padding: 10px; border-radius: 12px; color: var(--gold); font-weight: bold; margin-top: 15px;">
             ԸՆԴՀԱՆՈՒՐ: <span id="total-all">4</span>
@@ -121,11 +121,14 @@
             </div>
         </div>
 
-        <button class="back-btn" onclick="goBack('setup-panel')">ՀԵՏ</button>
+        <button class="back-btn" onclick="goBack(lastScreenID)">ՀԵՏ</button>
     </div>
 
     <div id="host-lobby" class="hidden">
         <h2 style="color:var(--gold); margin:5px 0;">ԿՈԴ՝ <span id="room-code-txt">....</span></h2>
+        
+        <button class="roles-btn" onclick="showRolesCatalog('host-lobby')" style="padding: 10px; font-size: 0.9em; margin-bottom: 15px;">🎭 ԴԵՐԵՐԻ ՑԱՆԿ (Հուշում)</button>
+
         <div id="admin-view-content">
             <p>Սպասում ենք մասնակիցներին...</p>
             <div id="player-list-display"></div>
@@ -228,6 +231,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     let currentRoomCode = "";
+    let lastScreenID = "setup-panel"; // Stores where we came from
 
     function calculate() {
         let r=0, b=0;
@@ -244,7 +248,9 @@
     }
 
     /* ---- ROLES CATALOG LOGIC (SPLIT) ---- */
-    function showRolesCatalog() {
+    function showRolesCatalog(sourceID) {
+        lastScreenID = sourceID; // Remember where we came from (setup or host lobby)
+        
         const redList = document.getElementById('red-roles-list');
         const blackList = document.getElementById('black-roles-list');
         redList.innerHTML = "";
@@ -255,14 +261,14 @@
             const btn = document.createElement('button');
             btn.className = 'role-item-btn';
             
-            // Icon logic (optional simple emoji)
-            let icon = "🕵️"; // Default
+            // Icon logic
+            let icon = "🕵️"; 
             if(roleData[roleName].team === "ԿԱՐՄԻՐ") icon = "🔴";
             else icon = "⚫";
             
             btn.innerText = `${icon} ${roleName}`;
             
-            // Add color indicator border
+            // Add color indicator border and click event
             if(roleData[roleName].team === "ԿԱՐՄԻՐ") {
                 btn.style.borderLeft = "4px solid var(--red-team)";
                 btn.onclick = () => openRolePreview(roleName);
