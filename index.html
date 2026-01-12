@@ -16,35 +16,31 @@
             --warning: #ff4757;
         }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: #eee; text-align: center; margin: 0; padding: 10px; }
-        .container { max-width: 800px; margin: auto; background: var(--card-bg); padding: 15px; border-radius: 25px; border: 1px solid #333; box-shadow: 0 0 30px rgba(0,0,0,0.7); }
+        .container { max-width: 800px; margin: auto; background: var(--card-bg); padding: 15px; border-radius: 25px; border: 1px solid #333; box-shadow: 0 0 30px rgba(0,0,0,0.7); position: relative; }
         
-        /* Buttons */
         button { width: 100%; padding: 16px; margin-top: 10px; border-radius: 12px; border: none; font-size: 1.1em; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.2s; }
         .host-btn { background: var(--red-team); color: white; }
         .join-btn { background: var(--black-team); color: white; }
+        .roles-btn { background: #555; color: var(--gold); border: 1px solid var(--gold); }
         .back-btn { background: #444; color: #ccc; }
         .reset-btn { background: #2c3e50; color: #fff; }
-        .info-btn-toggle { background: #333; color: white; padding: 8px 15px; border-radius: 10px; font-size: 0.8em; float: left; width: auto; margin: 0; }
 
-        /* Setup Grid */
         .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
         .column { background: #1f1f1f; padding: 10px; border-radius: 15px; border: 1px solid #333; }
         .role-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.95em; }
         input[type="number"] { width: 45px; padding: 5px; background: #000; border: 1px solid #444; color: white; border-radius: 5px; text-align: center; font-size: 1.1em; }
 
-        /* Admin List Table */
         .admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #111; border-radius: 10px; overflow: hidden; }
         .admin-table th, .admin-table td { padding: 12px; border-bottom: 1px solid #222; text-align: left; }
         .admin-table th { background: #222; color: var(--gold); }
         .role-badge { padding: 4px 8px; border-radius: 5px; font-weight: bold; font-size: 0.9em; }
 
-        /* Role Card Design */
+        /* Card Styles */
         .role-card { background: linear-gradient(145deg, #1a1a1a, #252525); border-radius: 25px; padding: 25px 20px; margin-top: 15px; border: 2px solid var(--gold); }
         .role-image-container { width: 100%; max-width: 350px; margin: 0 auto 15px; border-radius: 15px; overflow: hidden; border: 2px solid var(--gold); }
         .role-img { width: 100%; display: block; }
         .role-name-text { color: var(--gold); font-size: 2.8em; margin: 15px 0; text-shadow: 0 0 15px rgba(241, 196, 15, 0.4); font-weight: 900; letter-spacing: 1px; }
 
-        /* Detailed Description Box */
         .desc-box { background: #000; padding: 20px; border-radius: 15px; text-align: left; border-left: 5px solid var(--gold); margin-top: 20px; }
         .desc-text { margin-top: 10px; color: #ddd; line-height: 1.6; font-size: 1.15em; }
         .important-note { color: var(--warning); font-weight: bold; display: block; margin-top: 10px; text-transform: uppercase; border: 2px dashed var(--warning); padding: 10px; text-align: center; background: rgba(255, 71, 87, 0.1); border-radius: 8px; }
@@ -54,23 +50,34 @@
         .desc-red { color: var(--red-team); }
         .desc-black { color: var(--black-team); }
         
-        #guide-section { text-align: left; background: #222; border-radius: 15px; max-height: 0; overflow: hidden; transition: 0.4s; }
-        #guide-section.open { max-height: 2000px; padding: 15px; margin-bottom: 15px; border: 1px solid var(--gold); }
+        /* New Catalog Styles Split */
+        .catalog-split { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; text-align: left; }
+        .catalog-col h3 { text-align: center; margin-top: 0; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .role-item-btn { width: 100%; display: block; background: #222; color: #fff; padding: 12px; border-radius: 8px; border: 1px solid #444; font-size: 0.95em; text-align: left; margin-bottom: 8px; transition: 0.2s; }
+        .role-item-btn:hover { background: #333; transform: translateX(3px); }
+
+        /* Modal for preview */
+        #role-preview-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+        .close-preview { background: var(--red-team); width: auto; padding: 10px 30px; display: inline-block; margin-bottom: 20px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <button class="info-btn-toggle" onclick="toggleGuide()">📖 ԴԵՐԵՐԻ ՄԱՍԻՆ</button>
-    <div style="clear:both;"></div>
-
-    <div id="guide-section">
-        <div id="guide-content"></div>
+<div id="role-preview-modal" class="hidden">
+    <div style="max-width: 600px; margin: 0 auto;">
+        <button class="close-preview" onclick="closePreview()">ՓԱԿԵԼ ❌</button>
+        <div id="preview-content"></div>
     </div>
+</div>
 
+<div class="container">
+    
     <div id="setup-panel">
         <h1 style="color: var(--red-team); margin: 10px 0; letter-spacing: 2px;">MAFIA PRO</h1>
-        <div style="background: #222; padding: 10px; border-radius: 12px; color: var(--gold); font-weight: bold;">
+        
+        <button class="roles-btn" onclick="showRolesCatalog()">🎭 ԴԵՐԵՐ (Ցանկ)</button>
+
+        <div style="background: #222; padding: 10px; border-radius: 12px; color: var(--gold); font-weight: bold; margin-top: 15px;">
             ԸՆԴՀԱՆՈՒՐ: <span id="total-all">4</span>
         </div>
 
@@ -89,6 +96,7 @@
                 <div class="desc-black" style="font-weight:bold; margin-bottom:10px;">ՍԵՎԵՐ: <span id="total-black">2</span></div>
                 <div class="role-row"><label>Մաֆիա</label><input type="number" class="b-role" data-name="Մաֆիա" value="1" min="0" oninput="calculate()"></div>
                 <div class="role-row"><label>Դոն</label><input type="number" class="b-role" data-name="Դոն" value="1" min="0" oninput="calculate()"></div>
+                <div class="role-row"><label>Կոնտրագենտ</label><input type="number" class="b-role" data-name="Կոնտրագենտ" value="0" min="0" oninput="calculate()"></div>
                 <div class="role-row"><label>Գող</label><input type="number" class="b-role" data-name="Գող" value="0" min="0" oninput="calculate()"></div>
                 <div class="role-row"><label>Գեղեցկուհի</label><input type="number" class="b-role" data-name="Գեղեցկուհի" value="0" min="0" oninput="calculate()"></div>
                 <div class="role-row"><label>Հեղափոխական</label><input type="number" class="b-role" data-name="Հեղափոխական" value="0" min="0" oninput="calculate()"></div>
@@ -98,15 +106,31 @@
         <button class="join-btn" onclick="showJoinPanel()">ՄԻԱՆԱԼ</button>
     </div>
 
+    <div id="roles-catalog-panel" class="hidden">
+        <h2 style="color:var(--gold)">ԲՈԼՈՐ ԴԵՐԵՐԸ</h2>
+        
+        <div class="catalog-split">
+            <div class="catalog-col">
+                <h3 style="color:var(--red-team)">ԿԱՐՄԻՐՆԵՐ</h3>
+                <div id="red-roles-list"></div>
+            </div>
+            
+            <div class="catalog-col">
+                <h3 style="color:var(--black-team)">ՍԵՎԵՐ</h3>
+                <div id="black-roles-list"></div>
+            </div>
+        </div>
+
+        <button class="back-btn" onclick="goBack('setup-panel')">ՀԵՏ</button>
+    </div>
+
     <div id="host-lobby" class="hidden">
         <h2 style="color:var(--gold); margin:5px 0;">ԿՈԴ՝ <span id="room-code-txt">....</span></h2>
-        
         <div id="admin-view-content">
             <p>Սպասում ենք մասնակիցներին...</p>
             <div id="player-list-display"></div>
             <button class="host-btn" onclick="distributeFinal()">ԲԱԺԱՆԵԼ ԴԵՐԵՐԸ</button>
         </div>
-
         <button class="back-btn" onclick="goBack('setup-panel')">ՀԵՏ</button>
         <button class="reset-btn" onclick="resetGame()">ԶՐՈՅԱՑՆԵԼ</button>
     </div>
@@ -136,62 +160,67 @@
     const roleData = {
         "Ագենտ": { 
             team: "ԿԱՐՄԻՐ", 
-            img: "https://i.postimg.cc/q7bftL2z/ագենտ.png", 
+            img: "https://i.postimg.cc/2yNDpGYD/ագենտ.png", 
             desc: "Կարմիր խաղացող է: Նա արթնանում է առաջին գիշերը Մաֆիայի հետ միաժամանակ և տեսնում է բոլոր սևերին դեմքով: Նա պետք է թաքուն օգնի քաղաքին գտնել մաֆիաներին: <br><span class='important-note'>⚠️ ԽՍՏԻՎ ԱՐԳԵԼՎՈՒՄ Է ԲԱՑԱՀԱՅՏԵԼ ԻՐ ԴԵՐԸ:</span>" 
         },
         "Շերիֆ": { 
             team: "ԿԱՐՄԻՐ", 
-            img: "https://i.postimg.cc/ZRCG6dL7/Շերիֆ.png", 
+            img: "https://i.postimg.cc/dtBKXGS6/շերիֆ.png", 
             desc: "Կարմիր թիմի առաջնորդն է: Արթնանում է ամեն գիշեր և ստուգում մեկ խաղացողի: Խաղավարը նրան ցույց է տալիս՝ ընտրված մարդը կարմիր է, թե սև: Ցերեկը պետք է առաջնորդի քաղաքին:" 
         },
         "Բժիշկ": { 
             team: "ԿԱՐՄԻՐ", 
-            img: "https://i.postimg.cc/s26FBc52/բժիշկ.png", 
+            img: "https://i.postimg.cc/qB2rsPc2/Բժիշկ.png", 
             desc: "Արթնանում է ամեն գիշեր և ընտրում մեկ մասնակցի, ում ցանկանում է բուժել: Եթե մաֆիան այդ գիշեր կրակել է այդ մարդու վրա, նա չի մահանում և մնում է խաղի մեջ:" 
         },
         "Հոգևորական": { 
             team: "ԿԱՐՄԻՐ", 
-            img: "https://i.postimg.cc/s26FBc5n/հոգևորական.png", 
+            img: "https://i.postimg.cc/q7JRqJwk/հոգևորական.png", 
             desc: "Արթնանում է ամեն գիշեր և ստուգում մեկ խաղացողի: Նա իմանում է խաղացողի ՀՍՏԱԿ դերը: <br><span class='important-note'>⚠️ ՆԱ ԻՐԱՎՈՒՆՔ ՉՈՒՆԻ ԽՈՍՏՈՎԱՆԵԼՈՒ ԿԱՄ ԲԱՑԱՀԱՅՏԵԼՈՒ ԻՐ ԴԵՐԸ ՄՅՈՒՍՆԵՐԻՆ:</span>" 
         },
         "Թիկնապահ": { 
             team: "ԿԱՐՄԻՐ", 
-            img: "https://i.postimg.cc/wBfKtVDk/թինկապահ.png", 
+            img: "https://i.postimg.cc/SRLpm9QG/թիկնապահ.png", 
             desc: "Արթնանում է գիշերը և պաշտպանության տակ առնում մեկին: Եթե մաֆիան կրակում է պաշտպանվողի վրա, զոհվում է Թիկնապահը նրա փոխարեն:" 
         },
         "Բախտավոր": { 
             team: "ԿԱՐՄԻՐ", 
-            img: "https://i.postimg.cc/QM4LBbcV/բախտավոր.png", 
+            img: "https://i.postimg.cc/6qVNBZ6T/բախտավոր.png", 
             desc: "Ունի երկու կյանք: Եթե գիշերը նրա վրա կրակում են կամ ցերեկը հեռացնում են, նա չի լքում խաղը: Միայն երկրորդ անգամ թիրախավորվելուց հետո է դուրս գալիս:" 
         },
         "Քաղաքացի": { 
             team: "ԿԱՐՄԻՐ", 
-            img: "https://i.postimg.cc/SsRwhMYF/k'agak'ac'i.png", 
+            img: "https://i.postimg.cc/7YDkmKX1/քաղաքացի.png", 
             desc: "Հասարակ կարմիր խաղացող: Գիշերը քնում է: Նրա զենքը տրամաբանությունն է, լսողությունը և ցերեկային քվեարկությունը: Պետք է գտնի սևերին և համոզի քաղաքին հեռացնել նրանց:" 
         },
         "Մաֆիա": { 
             team: "ՍԵՎ", 
-            img: "https://i.postimg.cc/q7bftL2D/մաֆիոզ.png", 
+            img: "https://i.postimg.cc/yYPz50rt/մաֆիոզ.png", 
             desc: "Սև թիմի զինվորն է: Արթնանում է ամեն գիշեր Դոնի և մյուս մաֆիաների հետ: Նրանք համաձայնեցնում են և կրակում մեկ կարմիր խաղացողի վրա:" 
         },
         "Դոն": { 
             team: "ՍԵՎ", 
-            img: "https://i.postimg.cc/9f834pyZ/դոն.png", 
+            img: "https://i.postimg.cc/Y0NwtF2h/դոն.jpg", 
             desc: "Մաֆիայի պարագլուխն է: Գիշերը արթնանում է, կազմակերպում է սպանությունը: Բացի այդ, ունի առանձին քայլ՝ փնտրում է Շերիֆին: Խաղավարը նրան հուշում է՝ գտավ, թե ոչ:" 
+        },
+        "Կոնտրագենտ": { 
+            team: "ՍԵՎ", 
+            img: "https://i.postimg.cc/zfzBvz7D/կոնտրագենտ.png", 
+            desc: "Սև խաղացող է: Արթնանում է ամեն գիշեր և փորձում գտնել Ագենտին: Նրա նպատակն է սևերի թիմին համոզել, որ Ագենտին հեռացնեն խաղից առաջնահերթ:" 
         },
         "Գող": { 
             team: "ՍԵՎ", 
-            img: "https://i.postimg.cc/VNGySRXk/գող.png", 
+            img: "https://i.postimg.cc/j26rRfq2/գող.png", 
             desc: "Սև խաղացող է: Արթնանում է գիշերը և ընտրում մեկ զոհի: Այդ խաղացողը տվյալ գիշեր կորցնում է իր ակտիվ ունակությունը (Շերիֆը չի ստուգում, Բժիշկը չի բուժում):" 
         },
         "Գեղեցկուհի": { 
             team: "ՍԵՎ", 
-            img: "https://i.postimg.cc/j5Lpy7hF/սիրուհի.png", 
+            img: "https://i.postimg.cc/xdfC8f51/գեղեցկուհի.png", 
             desc: "Սև խաղացող է: Արթնանում է գիշերը և այցելում մեկին: Այդ խաղացողը հաջորդ ամբողջ ցերեկը չի կարողանում խոսել (փակվում է բերանը), բայց կարող է քվեարկել:" 
         },
         "Հեղափոխական": { 
             team: "ՍԵՎ", 
-            img: "https://i.postimg.cc/W4WRDn0S/հեղափոխական.png", 
+            img: "https://i.postimg.cc/PJbkdDf4/հեղափոխական.png", 
             desc: "Սև խաղացող է: Ամբողջ խաղի ընթացքում նրա ընտրած մարդուն ստուգելիս Շերիֆն ու Հոգևորականը ստանում են հակառակ (սխալ) պատասխան:" 
         }
     };
@@ -209,20 +238,64 @@
         document.getElementById('total-all').innerText = r+b;
     }
 
-    function toggleGuide() {
-        const guide = document.getElementById('guide-section');
-        guide.classList.toggle('open');
-        if(guide.classList.contains('open')) {
-            let h = "";
-            for(let r in roleData) h += `<p style="text-align:left; margin-bottom:15px;"><b style="color:var(--gold); font-size:1.1em;">${r}</b>: ${roleData[r].desc}</p><hr style="border-color:#333;">`;
-            document.getElementById('guide-content').innerHTML = h;
-        }
-    }
-
     function goBack(id) {
-        document.querySelectorAll('.container > div:not(.info-btn-toggle)').forEach(d => d.classList.add('hidden'));
+        document.querySelectorAll('.container > div:not(#role-preview-modal)').forEach(d => d.classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
     }
+
+    /* ---- ROLES CATALOG LOGIC (SPLIT) ---- */
+    function showRolesCatalog() {
+        const redList = document.getElementById('red-roles-list');
+        const blackList = document.getElementById('black-roles-list');
+        redList.innerHTML = "";
+        blackList.innerHTML = "";
+        
+        // Loop through all roles and distribute to columns
+        for (const roleName in roleData) {
+            const btn = document.createElement('button');
+            btn.className = 'role-item-btn';
+            
+            // Icon logic (optional simple emoji)
+            let icon = "🕵️"; // Default
+            if(roleData[roleName].team === "ԿԱՐՄԻՐ") icon = "🔴";
+            else icon = "⚫";
+            
+            btn.innerText = `${icon} ${roleName}`;
+            
+            // Add color indicator border
+            if(roleData[roleName].team === "ԿԱՐՄԻՐ") {
+                btn.style.borderLeft = "4px solid var(--red-team)";
+                btn.onclick = () => openRolePreview(roleName);
+                redList.appendChild(btn);
+            } else {
+                btn.style.borderLeft = "4px solid var(--black-team)";
+                btn.onclick = () => openRolePreview(roleName);
+                blackList.appendChild(btn);
+            }
+        }
+        goBack('roles-catalog-panel');
+    }
+
+    function openRolePreview(roleName) {
+        const d = roleData[roleName];
+        const html = `
+            <div class="role-card">
+                <div class="role-image-container"><img src="${d.img}" class="role-img"></div>
+                <div class="role-name-text">${roleName}</div>
+                <div class="desc-box">
+                    <b style="font-size:1.4em;">Թիմ՝ <span style="color:${d.team==='ԿԱՐՄԻՐ'?'var(--red-team)':'var(--black-team)'}">${d.team}</span></b>
+                    <p class="desc-text">${d.desc}</p>
+                </div>
+            </div>
+        `;
+        document.getElementById('preview-content').innerHTML = html;
+        document.getElementById('role-preview-modal').classList.remove('hidden');
+    }
+
+    function closePreview() {
+        document.getElementById('role-preview-modal').classList.add('hidden');
+    }
+    /* ----------------------------- */
 
     function resetGame() { if(confirm("Զրոյացնե՞լ:")) location.reload(); }
 
@@ -290,7 +363,6 @@
         });
     }
 
-    // Fisher-Yates Shuffle - 100% Պատահականություն
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
