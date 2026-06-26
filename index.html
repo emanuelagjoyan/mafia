@@ -2,166 +2,204 @@
 <html lang="hy">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mafia Pro - Ultimate Rules</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mafia Pro - Ultimate Voting Edition</title>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <style>
         :root {
-            --red-team: #e74c3c;
-            --black-team: #3498db;
+            --red-team: #ff4757;
+            --black-team: #2f3542;
+            --blue-team: #3742fa;
+            --neutral-team: #05c46b;
             --gold: #f1c40f;
             --bg: #0b0b0b;
             --card-bg: #161616;
-            --warning: #ff4757;
+            --glass: rgba(255, 255, 255, 0.05);
         }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: #eee; text-align: center; margin: 0; padding: 10px; }
-        .container { max-width: 800px; margin: auto; background: var(--card-bg); padding: 15px; border-radius: 25px; border: 1px solid #333; box-shadow: 0 0 30px rgba(0,0,0,0.7); position: relative; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: var(--bg); color: #eee; text-align: center; 
+            margin: 0; padding: 10px; -webkit-tap-highlight-color: transparent;
+        }
+        .container { 
+            max-width: 900px; margin: auto; background: var(--card-bg); 
+            padding: 15px; border-radius: 25px; border: 1px solid #333; 
+            box-shadow: 0 0 30px rgba(0,0,0,0.7); position: relative; 
+        }
         
-        button { width: 100%; padding: 16px; margin-top: 10px; border-radius: 12px; border: none; font-size: 1.1em; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.2s; }
+        button { 
+            width: 100%; padding: 16px; margin-top: 10px; border-radius: 12px; border: none; 
+            font-size: 1.1em; cursor: pointer; font-weight: bold; text-transform: uppercase; 
+            transition: 0.3s; touch-action: manipulation;
+        }
         .host-btn { background: var(--red-team); color: white; }
-        .join-btn { background: var(--black-team); color: white; }
-        .roles-btn { background: #555; color: var(--gold); border: 1px solid var(--gold); }
+        .join-btn { background: var(--blue-team); color: white; }
+        .roles-btn { background: #222; color: var(--gold); border: 1px solid var(--gold); }
         .back-btn { background: #444; color: #ccc; }
-        .reset-btn { background: #2c3e50; color: #fff; }
-
-        .setup-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-        .column { background: #1f1f1f; padding: 10px; border-radius: 15px; border: 1px solid #333; }
-        .role-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.95em; }
-        input[type="number"] { width: 45px; padding: 5px; background: #000; border: 1px solid #444; color: white; border-radius: 5px; text-align: center; font-size: 1.1em; }
-
-        .admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #111; border-radius: 10px; overflow: hidden; }
-        .admin-table th, .admin-table td { padding: 12px; border-bottom: 1px solid #222; text-align: left; }
-        .admin-table th { background: #222; color: var(--gold); }
-        .role-badge { padding: 4px 8px; border-radius: 5px; font-weight: bold; font-size: 0.9em; }
-
-        /* Card Styles */
-        .role-card { background: linear-gradient(145deg, #1a1a1a, #252525); border-radius: 25px; padding: 25px 20px; margin-top: 15px; border: 2px solid var(--gold); }
-        .role-image-container { width: 100%; max-width: 350px; margin: 0 auto 15px; border-radius: 15px; overflow: hidden; border: 2px solid var(--gold); }
-        .role-img { width: 100%; display: block; }
+        .vote-btn { background: var(--gold); color: #000; font-size: 1.3em; }
+        .stop-btn { background: #e67e22 !important; color: white !important; font-size: 1.3em; }
         
-        /* UPDATED: Role Name Text with Auto-Resizing */
-        .role-name-text { 
-            color: var(--gold); 
-            /* Changes size automatically between 1.8em and 2.8em depending on screen width */
-            font-size: clamp(1.8em, 6vw, 2.8em); 
-            margin: 15px 0; 
-            text-shadow: 0 0 15px rgba(241, 196, 15, 0.4); 
-            font-weight: 900; 
-            letter-spacing: 1px;
-            /* Prevents overflow */
-            word-wrap: break-word;
-            overflow-wrap: break-word;
-            line-height: 1.1;
-            width: 100%;
+        .kick-btn { background: #c0392b; color: white; padding: 8px 12px; width: auto; font-size: 1em; border-radius: 8px; margin: 0; }
+        .candidate-btn { background: #27ae60; color: white; padding: 8px 12px; width: auto; font-size: 1em; border-radius: 8px; margin: 0; }
+        .undo-btn { background: #34495e; color: white; width: auto; padding: 8px 15px; font-size: 0.8em; border-radius: 10px; }
+
+        .setup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
+        @media (max-width: 600px) {
+            .setup-grid { grid-template-columns: 1fr; } 
         }
 
-        .desc-box { background: #000; padding: 20px; border-radius: 15px; text-align: left; border-left: 5px solid var(--gold); margin-top: 20px; }
-        .desc-text { margin-top: 10px; color: #ddd; line-height: 1.6; font-size: 1.15em; }
-        .important-note { color: var(--warning); font-weight: bold; display: block; margin-top: 10px; text-transform: uppercase; border: 2px dashed var(--warning); padding: 10px; text-align: center; background: rgba(255, 71, 87, 0.1); border-radius: 8px; }
-
-        .player-tag { background: #2c3e50; padding: 8px 12px; margin: 4px; display: inline-block; border-radius: 10px; font-size: 0.9em; }
-        .hidden { display: none; }
-        .desc-red { color: var(--red-team); }
-        .desc-black { color: var(--black-team); }
+        .column { background: #1f1f1f; padding: 10px; border-radius: 15px; border: 1px solid #333; }
+        .role-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 0.9em; }
         
-        /* New Catalog Styles Split */
-        .catalog-split { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; text-align: left; }
-        .catalog-col h3 { text-align: center; margin-top: 0; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
-        .role-item-btn { width: 100%; display: block; background: #222; color: #fff; padding: 12px; border-radius: 8px; border: 1px solid #444; font-size: 0.95em; text-align: left; margin-bottom: 8px; transition: 0.2s; }
-        .role-item-btn:hover { background: #333; transform: translateX(3px); }
+        input[type="number"], input[type="text"] { 
+            width: 100%; padding: 15px; background: #000; border: 1px solid #444; color: white; 
+            border-radius: 12px; box-sizing: border-box; font-size: 1.1em; margin-bottom: 10px; 
+        }
+        input[type="number"].role-count { width: 45px; padding: 5px; font-size: 1em; margin-bottom: 0; text-align: center; }
 
-        /* Modal for preview */
-        #role-preview-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 999; overflow-y: auto; padding: 20px; box-sizing: border-box; }
-        .close-preview { background: var(--red-team); width: auto; padding: 10px 30px; display: inline-block; margin-bottom: 20px; }
+        .counter-badge { background: #222; padding: 5px 10px; border-radius: 8px; color: var(--gold); font-size: 0.9em; margin-bottom: 10px; display: inline-block; border: 1px solid #444; }
+
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 15px; background: #111; border-radius: 15px; overflow: hidden; font-size: 1.1em; }
+        .admin-table td { padding: 12px; border-bottom: 1px solid #222; text-align: left; }
+        .role-red-text { color: var(--red-team); font-weight: bold; }
+        .role-black-text { color: var(--blue-team); font-weight: bold; }
+        .role-neutral-text { color: var(--neutral-team); font-weight: bold; }
+
+        #roles-catalog-overlay, #vote-modal-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.92); backdrop-filter: blur(8px); 
+            z-index: 9000; display: none; align-items: center; justify-content: center; padding: 15px; box-sizing: border-box; 
+        }
+        .catalog-modal { 
+            background: #111; border: 1px solid #444; border-radius: 25px; 
+            width: 100%; max-width: 800px; max-height: 85vh; overflow-y: auto; padding: 20px; 
+        }
+        .role-pill { background: var(--glass); border: 1px solid #333; color: #fff; padding: 10px; border-radius: 10px; margin-bottom: 8px; cursor: pointer; display: flex; justify-content: space-between; font-size: 0.9em; }
+        
+        .role-card { background: linear-gradient(145deg, #1a1a1a, #252525); border-radius: 20px; padding: 20px; border: 2px solid var(--gold); }
+        
+        /* Ֆիքսված չափսերով նկարների կոնտեյներ */
+        .role-image-container { 
+            width: 100%; 
+            max-width: 300px; 
+            aspect-ratio: 2 / 3; 
+            margin: 0 auto 15px; 
+            border-radius: 15px; 
+            overflow: hidden; 
+            border: 2px solid var(--gold); 
+            background: #111;
+        }
+        .role-img { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            object-position: center top; 
+            display: block; 
+        }
+
+        .role-name-text { color: var(--gold); font-size: clamp(1.6em, 5vw, 2.5em); font-weight: 900; margin: 10px 0; }
+        .desc-box { background: #000; padding: 15px; border-radius: 12px; text-align: left; border-left: 5px solid var(--gold); }
+        .desc-text { color: #ccc; font-size: 1em; line-height: 1.4; }
+
+        .vote-result-row { display: flex; justify-content: space-between; background: #222; padding: 10px; margin: 5px 0; border-radius: 8px; border-left: 4px solid var(--gold); }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<div id="role-preview-modal" class="hidden">
-    <div style="max-width: 600px; margin: 0 auto;">
-        <button class="close-preview" onclick="closePreview()">ՓԱԿԵԼ ❌</button>
+<div id="roles-catalog-overlay">
+    <div class="catalog-modal">
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="color:var(--gold); margin:0;">🎭 ԴԵՐԵՐ</h2>
+            <button onclick="toggleCatalog()" style="width:auto; padding:5px 15px; background:#444; margin:0;">✕</button>
+        </div>
+        <div class="setup-grid">
+            <div><h4 style="color:var(--red-team); margin-top:0;">ԿԱՐՄԻՐ</h4><div id="red-cat-list"></div></div>
+            <div><h4 style="color:var(--blue-team); margin-top:0;">ՍԵՎ</h4><div id="black-cat-list"></div></div>
+            <div><h4 style="color:var(--neutral-team); margin-top:0;">ՉԵԶՈՔ</h4><div id="neutral-cat-list"></div></div>
+        </div>
+    </div>
+</div>
+
+<div id="role-preview-modal" class="hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 10000; padding: 15px; overflow-y: auto;">
+    <div style="max-width: 500px; margin: 0 auto;">
+        <button class="back-btn" onclick="closePreview()" style="width:auto; padding:10px 25px; margin-bottom:15px;">← ՀԵՏ</button>
         <div id="preview-content"></div>
     </div>
 </div>
 
-<div class="container">
-    
-    <div id="setup-panel">
-        <h1 style="color: var(--red-team); margin: 10px 0; letter-spacing: 2px;">MAFIA PRO</h1>
-        
-        <button class="roles-btn" onclick="showRolesCatalog('setup-panel')">🎭 ԴԵՐԵՐ (Ցանկ)</button>
+<div id="vote-modal-overlay">
+    <div class="catalog-modal">
+        <h2 id="player-vote-title" style="color: var(--gold);">🗳️ ՔՎԵԱՐԿՈՒԹՅՈՒՆ</h2>
+        <div id="candidate-list-player"></div>
+        <div id="vote-results-player" class="hidden"></div>
+    </div>
+</div>
 
-        <div style="background: #222; padding: 10px; border-radius: 12px; color: var(--gold); font-weight: bold; margin-top: 15px;">
-            ԸՆԴՀԱՆՈՒՐ: <span id="total-all">4</span>
+<div class="container">
+    <div id="setup-panel">
+        <h1 style="color: var(--red-team); margin-top: 5px;">MAFIA PRO</h1>
+        <button class="roles-btn" onclick="toggleCatalog()">📖 ԴԵՐԵՐԻ ՏԵՂԵԿԱՏՈՒ</button>
+        
+        <div style="margin-top:15px;">
+            <span class="counter-badge">ԸՆԴՀԱՆՈՒՐ: <b id="setup-total-all">0</b></span>
+            <span class="counter-badge" style="color:var(--red-team)">🔴 <b id="setup-total-red">0</b></span>
+            <span class="counter-badge" style="color:var(--blue-team)">🔵 <b id="setup-total-black">0</b></span>
+            <span class="counter-badge" style="color:var(--neutral-team)">🟢 <b id="setup-total-neutral">0</b></span>
         </div>
 
         <div class="setup-grid">
             <div class="column">
-                <div class="desc-red" style="font-weight:bold; margin-bottom:10px;">ԿԱՐՄԻՐՆԵՐ: <span id="total-red">2</span></div>
-                <div class="role-row"><label>Շերիֆ</label><input type="number" class="r-role" data-name="Շերիֆ" value="1" min="0" oninput="calculate()"></div>
-                <div class="role-row"><label>Բժիշկ</label><input type="number" class="r-role" data-name="Բժիշկ" value="1" min="0" oninput="calculate()"></div>
-                <div class="role-row"><label>Հոգևորական</label><input type="number" class="r-role" data-name="Հոգևորական" value="0" min="0" oninput="calculate()"></div>
-                <div class="role-row"><label>Թիկնապահ</label><input type="number" class="r-role" data-name="Թիկնապահ" value="0" min="0" oninput="calculate()"></div>
-                <div class="role-row"><label>Ագենտ</label><input type="number" class="r-role" data-name="Ագենտ" value="0" min="0" oninput="calculate()"></div>
-                <div class="role-row"><label>Բախտավոր</label><input type="number" class="r-role" data-name="Բախտավոր" value="0" min="0" oninput="calculate()"></div>
-                <div class="role-row"><label>Քաղաքացի</label><input type="number" class="r-role" data-name="Քաղաքացի" value="0" min="0" oninput="calculate()"></div>
+                <div style="color:var(--red-team); font-weight:bold; margin-bottom:5px;">ԿԱՐՄԻՐ</div>
+                <div id="setup-red-inputs"></div>
             </div>
             <div class="column">
-                <div class="desc-black" style="font-weight:bold; margin-bottom:10px;">ՍԵՎԵՐ: <span id="total-black">2</span></div>
-                <div class="role-row"><label>Մաֆիա</label><input type="number" class="b-role" data-name="Մաֆիա" value="1" min="0" oninput="calculate()"></div>
-                <div class="role-row"><label>Դոն</label><input type="number" class="b-role" data-name="Դոն" value="1" min="0" oninput="calculate()"></div>
-                <div class="role-row"><label>Կոնտրագենտ</label><input type="number" class="b-role" data-name="Կոնտրագենտ" value="0" min="0" oninput="calculate()"></div>
-                <div class="role-row"><label>Գող</label><input type="number" class="b-role" data-name="Գող" value="0" min="0" oninput="calculate()"></div>
-                <div class="role-row"><label>Գեղեցկուհի</label><input type="number" class="b-role" data-name="Գեղեցկուհի" value="0" min="0" oninput="calculate()"></div>
-                <div class="role-row"><label>Հեղափոխական</label><input type="number" class="b-role" data-name="Հեղափոխական" value="0" min="0" oninput="calculate()"></div>
+                <div style="color:var(--blue-team); font-weight:bold; margin-bottom:5px;">ՍԵՎ</div>
+                <div id="setup-black-inputs"></div>
+            </div>
+            <div class="column">
+                <div style="color:var(--neutral-team); font-weight:bold; margin-bottom:5px;">ՉԵԶՈՔ</div>
+                <div id="setup-neutral-inputs"></div>
             </div>
         </div>
         <button class="host-btn" onclick="startHost()">ՍՏԵՂԾԵԼ ՍԵՆՅԱԿ</button>
-        <button class="join-btn" onclick="showJoinPanel()">ՄԻԱՆԱԼ</button>
-    </div>
-
-    <div id="roles-catalog-panel" class="hidden">
-        <h2 style="color:var(--gold)">ԲՈԼՈՐ ԴԵՐԵՐԸ</h2>
-        
-        <div class="catalog-split">
-            <div class="catalog-col">
-                <h3 style="color:var(--red-team)">ԿԱՐՄԻՐՆԵՐ</h3>
-                <div id="red-roles-list"></div>
-            </div>
-            
-            <div class="catalog-col">
-                <h3 style="color:var(--black-team)">ՍԵՎԵՐ</h3>
-                <div id="black-roles-list"></div>
-            </div>
-        </div>
-
-        <button class="back-btn" onclick="goBack(lastScreenID)">ՀԵՏ</button>
+        <button class="join-btn" onclick="showJoinPanel()">ՄԻԱՆԱԼ ԽԱՂԻՆ</button>
     </div>
 
     <div id="host-lobby" class="hidden">
-        <h2 style="color:var(--gold); margin:5px 0;">ԿՈԴ՝ <span id="room-code-txt">....</span></h2>
+        <h2 style="color:var(--gold); font-size: 2em; margin: 10px 0;">ԿՈԴ՝ <span id="room-code-txt">....</span></h2>
+        <div id="player-list-admin"></div>
+        <button class="host-btn" id="dist-btn" onclick="distributeFinal()">ԲԱԺԱՆԵԼ ԴԵՐԵՐԸ</button>
         
-        <button class="roles-btn" onclick="showRolesCatalog('host-lobby')" style="padding: 10px; font-size: 0.9em; margin-bottom: 15px;">🎭 ԴԵՐԵՐԻ ՑԱՆԿ (Հուշում)</button>
-
-        <div id="admin-view-content">
-            <p>Սպասում ենք մասնակիցներին...</p>
-            <div id="player-list-display"></div>
-            <button class="host-btn" onclick="distributeFinal()">ԲԱԺԱՆԵԼ ԴԵՐԵՐԸ</button>
+        <div id="vote-admin-area" class="hidden" style="background: #222; padding: 15px; border-radius: 15px; border: 1px solid var(--gold); margin-top: 15px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h3 style="color: var(--gold); margin:0; font-size: 1.2em;">🗳️ ՔՎԵԱՐԿՈՒԹՅՈՒՆ</h3>
+                <button class="undo-btn" onclick="undoLastAction()" style="margin:0;">↩️ ՀԵՏ ՏԱԼ</button>
+            </div>
+            <div id="candidate-list-admin" style="margin:10px 0; text-align:left; font-size: 1.1em;"></div>
+            <button id="host-vote-control-btn" class="vote-btn" onclick="toggleVotingState()">ՍԿՍԵԼ</button>
+            <button class="back-btn" onclick="clearVoteData()">ՄԱՔՐԵԼ</button>
         </div>
-        <button class="back-btn" onclick="goBack('setup-panel')">ՀԵՏ</button>
-        <button class="reset-btn" onclick="resetGame()">ԶՐՈՅԱՑՆԵԼ</button>
+
+        <button class="roles-btn" onclick="toggleCatalog()" style="margin-top: 25px;">🎭 ԴԵՐԵՐԻ ՑԱՆԿ</button>
+        <button class="back-btn" onclick="exitGameAndReset()" style="background: #c0392b; color: white;">🛑 ԵԼՔ (ԶՐՈՅԱՑՆԵԼ)</button>
     </div>
 
     <div id="join-panel" class="hidden">
-        <h2>ՄԻԱՆԱԼ</h2>
-        <input type="number" id="join-code" placeholder="Կոդը" style="width:100%; padding:15px; box-sizing:border-box; border-radius:10px; margin-bottom:10px;">
-        <input type="text" id="p-name" placeholder="Ձեր անունը" style="width:100%; padding:15px; box-sizing:border-box; border-radius:10px; margin-bottom:10px;">
+        <h2 style="color: var(--blue-team);">ՄԻԱՆԱԼ</h2>
+        <input type="number" id="join-code" placeholder="Սենյակի կոդը">
+        <input type="text" id="p-name" placeholder="Ձեր անունը">
         <button class="join-btn" onclick="joinNow()">ՄՏՆԵԼ</button>
         <button class="back-btn" onclick="goBack('setup-panel')">ՀԵՏ</button>
     </div>
 
-    <div id="role-display-panel" class="hidden"></div>
+    <div id="role-display-panel" class="hidden">
+        <div id="player-role-info"></div>
+        <button class="roles-btn" onclick="toggleCatalog()" style="margin-top: 25px;">🎭 ԴԵՐԵՐԻ ՑԱՆԿ</button>
+        <button class="back-btn" onclick="location.reload()" style="margin-top: 10px;">🛑 ԵԼՔ</button>
+    </div>
 </div>
 
 <script>
@@ -176,244 +214,257 @@
     };
 
     const roleData = {
-        "Ագենտ": { 
-            team: "ԿԱՐՄԻՐ", 
-            img: "https://i.postimg.cc/2yNDpGYD/ագենտ.png", 
-            desc: "Կարմիր խաղացող է: Նա արթնանում է առաջին գիշերը Մաֆիայի հետ միաժամանակ և տեսնում է բոլոր սևերին դեմքով: Նա պետք է թաքուն օգնի քաղաքին գտնել մաֆիաներին: <br><span class='important-note'>⚠️ ԽՍՏԻՎ ԱՐԳԵԼՎՈՒՄ Է ԲԱՑԱՀԱՅՏԵԼ ԻՐ ԴԵՐԸ:</span>" 
-        },
-        "Շերիֆ": { 
-            team: "ԿԱՐՄԻՐ", 
-            img: "https://i.postimg.cc/dtBKXGS6/շերիֆ.png", 
-            desc: "Կարմիր թիմի առաջնորդն է: Արթնանում է ամեն գիշեր և ստուգում մեկ խաղացողի: Խաղավարը նրան ցույց է տալիս՝ ընտրված մարդը կարմիր է, թե սև: Ցերեկը պետք է առաջնորդի քաղաքին:" 
-        },
-        "Բժիշկ": { 
-            team: "ԿԱՐՄԻՐ", 
-            img: "https://i.postimg.cc/qB2rsPc2/Բժիշկ.png", 
-            desc: "Արթնանում է ամեն գիշեր և ընտրում մեկ մասնակցի, ում ցանկանում է բուժել: Եթե մաֆիան այդ գիշեր կրակել է այդ մարդու վրա, նա չի մահանում և մնում է խաղի մեջ:" 
-        },
-        "Հոգևորական": { 
-            team: "ԿԱՐՄԻՐ", 
-            img: "https://i.postimg.cc/q7JRqJwk/հոգևորական.png", 
-            desc: "Արթնանում է ամեն գիշեր և ստուգում մեկ խաղացողի: Նա իմանում է խաղացողի ՀՍՏԱԿ դերը: <br><span class='important-note'>⚠️ ՆԱ ԻՐԱՎՈՒՆՔ ՉՈՒՆԻ ԽՈՍՏՈՎԱՆԵԼՈՒ ԿԱՄ ԲԱՑԱՀԱՅՏԵԼՈՒ ԻՐ ԴԵՐԸ ՄՅՈՒՍՆԵՐԻՆ:</span>" 
-        },
-        "Թիկնապահ": { 
-            team: "ԿԱՐՄԻՐ", 
-            img: "https://i.postimg.cc/SRLpm9QG/թիկնապահ.png", 
-            desc: "Արթնանում է գիշերը և պաշտպանության տակ առնում մեկին: Եթե մաֆիան կրակում է պաշտպանվողի վրա, զոհվում է Թիկնապահը նրա փոխարեն:" 
-        },
-        "Բախտավոր": { 
-            team: "ԿԱՐՄԻՐ", 
-            img: "https://i.postimg.cc/6qVNBZ6T/բախտավոր.png", 
-            desc: "Ունի երկու կյանք: Եթե գիշերը նրա վրա կրակում են կամ ցերեկը հեռացնում են, նա չի լքում խաղը: Միայն երկրորդ անգամ թիրախավորվելուց հետո է դուրս գալիս:" 
-        },
-        "Քաղաքացի": { 
-            team: "ԿԱՐՄԻՐ", 
-            img: "https://i.postimg.cc/7YDkmKX1/քաղաքացի.png", 
-            desc: "Հասարակ կարմիր խաղացող: Գիշերը քնում է: Նրա զենքը տրամաբանությունն է, լսողությունը և ցերեկային քվեարկությունը: Պետք է գտնի սևերին և համոզի քաղաքին հեռացնել նրանց:" 
-        },
-        "Մաֆիա": { 
-            team: "ՍԵՎ", 
-            img: "https://i.postimg.cc/yYPz50rt/մաֆիոզ.png", 
-            desc: "Սև թիմի զինվորն է: Արթնանում է ամեն գիշեր Դոնի և մյուս մաֆիաների հետ: Նրանք համաձայնեցնում են և կրակում մեկ կարմիր խաղացողի վրա:" 
-        },
-        "Դոն": { 
-            team: "ՍԵՎ", 
-            img: "https://i.postimg.cc/Y0NwtF2h/դոն.jpg", 
-            desc: "Մաֆիայի պարագլուխն է: Գիշերը արթնանում է, կազմակերպում է սպանությունը: Բացի այդ, ունի առանձին քայլ՝ փնտրում է Շերիֆին: Խաղավարը նրան հուշում է՝ գտավ, թե ոչ:" 
-        },
-        "Կոնտրագենտ": { 
-            team: "ՍԵՎ", 
-            img: "https://i.postimg.cc/zfzBvz7D/կոնտրագենտ.png", 
-            desc: "Սև խաղացող է: Արթնանում է ամեն գիշեր և փորձում գտնել Ագենտին: Նրա նպատակն է սևերի թիմին համոզել, որ Ագենտին հեռացնեն խաղից առաջնահերթ:" 
-        },
-        "Գող": { 
-            team: "ՍԵՎ", 
-            img: "https://i.postimg.cc/j26rRfq2/գող.png", 
-            desc: "Սև խաղացող է: Արթնանում է գիշերը և ընտրում մեկ զոհի: Այդ խաղացողը տվյալ գիշեր կորցնում է իր ակտիվ ունակությունը (Շերիֆը չի ստուգում, Բժիշկը չի բուժում):" 
-        },
-        "Գեղեցկուհի": { 
-            team: "ՍԵՎ", 
-            img: "https://i.postimg.cc/xdfC8f51/գեղեցկուհի.png", 
-            desc: "Սև խաղացող է: Արթնանում է գիշերը և այցելում մեկին: Այդ խաղացողը հաջորդ ամբողջ ցերեկը չի կարողանում խոսել (փակվում է բերանը), բայց կարող է քվեարկել:" 
-        },
-        "Հեղափոխական": { 
-            team: "ՍԵՎ", 
-            img: "https://i.postimg.cc/PJbkdDf4/հեղափոխական.png", 
-            desc: "Սև խաղացող է: Ամբողջ խաղի ընթացքում նրա ընտրած մարդուն ստուգելիս Շերիֆն ու Հոգևորականը ստանում են հակառակ (սխալ) պատասխան:" 
-        }
+        "Ագենտ": { team: "ԿԱՐՄԻՐ", img: "https://i.postimg.cc/2yNDpGYD/ագենտ.png", desc: "Նա արթնանում է առաջին գիշերը Մաֆիայի հետ միաժամանակ և տեսնում է բոլոր սևերին դեմքով: <br>⚠️ ԽՍՏԻՎ ԱՐԳԵԼՎՈՒՄ Է ԲԱՑԱՀԱՅՏԵԼ ԻՐ ԴԵՐԸ:" },
+        "Շերիֆ": { team: "ԿԱՐՄԻՐ", img: "https://i.postimg.cc/dtBKXGS6/շերիֆ.png", desc: "Արթնանում է ամեն գիշեր և ստուգում մեկ խաղացողի: Խաղավարը նրան ցույց է տալիս՝ ընտրված մարդը կարմիր է, թե սև:" },
+        "Բժիշկ": { team: "ԿԱՐՄԻՐ", img: "https://i.postimg.cc/qB2rsPc2/Բժիշկ.png", desc: "Արթնանում է ամեն գիշեր և ընտրում մեկ մասնակցի, ում ցանկանում է բուժել: Եթե մաֆիան կրակել է նրա վրա, նա չի մահանում:" },
+        "Հոգևորական": { team: "ԿԱՐՄԻՐ", img: "https://i.postimg.cc/q7JRqJwk/հոգևորական.png", desc: "Արթնանում է ամեն գիշեր և ստուգում մեկ խաղացողի: Նա իմանում է խաղացողի ՀՍՏԱԿ դերը: <br>⚠️ ՉԻ ԿԱՐՈՂ ԲԱՑԱՀԱՅՏԵԼ ԻՐ ԴԵՐԸ:" },
+        "Թիկնապահ": { team: "ԿԱՐՄԻՐ", img: "https://i.postimg.cc/SRLpm9QG/թիկնապահ.png", desc: "Արթնանում է գիշերը և պաշտպանում մեկին: Եթե մաֆիան կրակում է պաշտպանվողի վրա, զոհվում է Թիկնապահը նրա փոխարեն:" },
+        "Բախտավոր": { team: "ԿԱՐՄԻՐ", img: "https://i.postimg.cc/6qVNBZ6T/բախտավոր.png", desc: "Ունի երկու կյանք: Եթե գիշերը նրա վրա կրակում են կամ ցերեկը հեռացնում են, նա առաջին անգամ չի լքում խաղը:" },
+        "Քաղաքացի": { team: "ԿԱՐՄԻՐ", img: "https://i.postimg.cc/7YDkmKX1/քաղաքացի.png", desc: "Հասարակ կարմիր խաղացող: Նրա զենքը տրամաբանությունն է և ցերեկային քվեարկությունը:" },
+        "Լրագրող": { team: "ԿԱՐՄԻՐ", img: "https://i.postimg.cc/j5gqJhw4/larry-king-01-gty-llr-210102-1609623448458-hp-Main.jpg", desc: "Արթնանում է խաղի ընթացքում ընդամենը 1 անգամ: Ընտրում է երկու խաղացողի և պարզում՝ նրանք նու՞յն թիմից են (օրինակ՝ երկուսն էլ սև կամ երկուսն էլ կարմիր), թե՞ տարբեր:" },
+        "Վրիժառու": { team: "ԿԱՐՄԻՐ", img: "https://miro.medium.com/v2/resize:fit:720/format:webp/1*So80rD8bCJbJ47OkT4SuYg.jpeg", desc: "Եթե նրան գիշերը սպանում են, նա չի մահանում միայնակ: Նա իրավունք է ստանում անմիջապես կրակել և իր հետ տանել մեկ այլ խաղացողի:" },
+        "Դատավոր": { team: "ԿԱՐՄԻՐ", img: "https://i.postimg.cc/7YDG8K3R/datavor.png", desc: "Ցերեկային քվեարկության ժամանակ, եթե ինչ-որ մեկին հեռացնում են, Դատավորը կարող է մեկ անգամ խաղի ընթացքում ցույց տալ իր դերը և չեղարկել այդ քվեարկությունը՝ փրկելով խաղացողին:" },
+        "Քաղաքապետ": { team: "ԿԱՐՄԻՐ", img: "https://i.postimg.cc/wTwsHhT5/k'agak'apet.png", desc: "Քաղաքի ղեկավարն է: Նրա ձայնը ցերեկային քվեարկության ժամանակ հավասար է 2 ձայնի:" },
+        "Թափառաշրջիկ": { team: "ԿԱՐՄԻՐ", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/00/Charlie_Chaplin.jpg/800px-Charlie_Chaplin.jpg", desc: "Չունի սեփական տուն, այդ պատճառով ամեն գիշեր քնում է մեկի տանը: Եթե մաֆիան գա նրա տուն, նրան չեն գտնի: Բայց եթե մաֆիան գնա այն մարդու տուն, ում հյուր է գնացել Թափառաշրջիկը, երկուսն էլ կմահանան:" },
+
+        "Մաֆիա": { team: "ՍԵՎ", img: "https://i.postimg.cc/yYPz50rt/մաֆիոզ.png", desc: "Սև թիմի զինվորն է: Արթնանում է ամեն գիշեր Դոնի հետ և կրակում մեկ կարմիր խաղացողի վրա:" },
+        "Դոն": { team: "ՍԵՎ", img: "https://i.postimg.cc/Y0NwtF2h/դոն.jpg", desc: "Մաֆիայի պարագլուխն է: Գիշերը արթնանում է, կազմակերպում սպանությունը և փնտրում Շերիֆին:" },
+        "Կոնտրագենտ": { team: "ՍԵՎ", img: "https://i.postimg.cc/zfzBvz7D/կոնտրագենտ.png", desc: "Սև խաղացող է: Արթնանում է ամեն գիշեր և փորձում գտնել Ագենտին, որպեսզի սևերը առաջինը նրան հեռացնեն:" },
+        "Գող": { team: "ՍԵՎ", img: "https://i.postimg.cc/j26rRfq2/գող.png", desc: "Սև խաղացող է: Արթնանում է գիշերը և զրկում մեկ խաղացողի իր ակտիվ ունակությունից տվյալ գիշեր:" },
+        "Գեղեցկուհի": { team: "ՍԵՎ", img: "https://i.postimg.cc/xdfC8f51/գեղեցկուհի.png", desc: "Այցելում է մեկին և լռեցնում նրան հաջորդ օրվա համար:" },
+        "Հեղափոխական": { team: "ՍԵՎ", img: "https://i.postimg.cc/fLFtQ5Rk/rev.webp", desc: "Սև խաղացող է: Խաղի ընթացքում մեկ անգամ ընտրում է մեկ խաղացողի (կարող է նաև իրեն), որից հետո ողջ խաղի ընթացքում երբ Շերիֆը կամ Հոգևորականը ստուգեն այդ մարդուն, նրանք կստանան ՍԽԱԼ պատասխան (Կարմիրը կերևա Սև, իսկ Սևը՝ Կարմիր):" },
+        "Փաստաբան": { team: "ՍԵՎ", img: "https://upload.wikimedia.org/wikipedia/en/3/34/Jimmy_McGill_BCS_S3.png", desc: "Սև թիմի պաշտպանն է: Ամեն գիշեր ընտրում է մաֆիայի անդամներից մեկին: Եթե Շերիֆը ստուգի այդ մարդուն, նա կերևա որպես ԿԱՐՄԻՐ (Մաքուր):" },
+        "Ահաբեկիչ": { team: "ՍԵՎ", img: "https://i0.wp.com/bamfstyle.com/wp-content/uploads/2025/11/NC4OM-Anton-MAIN1b.jpg?ssl=1", desc: "Եթե ցերեկը նրան քվեարկությամբ հեռացնում են, նա կարող է ընտրել ցանկացած խաղացողի և պայթել նրա հետ միասին:" },
+        "Սև Կարդինալ": { team: "ՍԵՎ", img: "https://i.postimg.cc/4N7WhN7h/kardinal.png", desc: "Սև խաղացող է, սակայն գիշերը «Մաֆիայի» հետ չի արթնանում և չի մասնակցում կրակոցին։ Առաջին գիշերը, մաֆիայի քնելուց հետո, խաղավարը նրան արթնացնում է և ցույց տալիս բոլոր սև խաղացողներին (այդ թվում՝ Ագենտին)՝ առանց դերերը հստակեցնելու։" },
+
+        "Մոլագար": { team: "ՉԵԶՈՔ", img: "https://i.postimg.cc/6qf7SZy7/hegap'oxakan.png", desc: "Չեզոք խաղացող է, որը կարող է ամեն գիշեր սպանել ցանկացած խաղացողի:" },
+        "Ծաղրածու": { team: "ՉԵԶՈՔ", img: "https://res.cloudinary.com/ybmedia/image/upload/c_crop,h_1000,w_1500,x_0,y_0/c_fill,f_auto,h_1200,q_auto,w_1600/v1/m/c/1/c12ba0e04ac29056b564b890ebf5d49b6296139e/20-best-horror-films-franchises-featuring-scary.jpg", desc: "Խելագար կերպար է: Նրա միակ նպատակն է, որպեսզի ցերեկային քվեարկության ժամանակ իրեն հեռացնեն: Եթե նրան հանում են խաղից, նա ՀԱՂԹՈՒՄ Է:" }
     };
 
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-    let currentRoomCode = "";
-    let lastScreenID = "setup-panel"; // Stores where we came from
+    let currentRoomCode = "", myId = "", isHost = false, lastDeleted = null, lastAddedCanId = null;
+
+    window.onload = () => {
+        const savedName = localStorage.getItem('mafia_player_name');
+        if(savedName) document.getElementById('p-name').value = savedName;
+    };
 
     function calculate() {
-        let r=0, b=0;
-        document.querySelectorAll('.r-role').forEach(i => r += parseInt(i.value)||0);
-        document.querySelectorAll('.b-role').forEach(i => b += parseInt(i.value)||0);
-        document.getElementById('total-red').innerText = r;
-        document.getElementById('total-black').innerText = b;
-        document.getElementById('total-all').innerText = r+b;
+        let r = 0, b = 0, n = 0;
+        document.querySelectorAll('.r-role-input').forEach(i => r += Math.max(0, parseInt(i.value) || 0));
+        document.querySelectorAll('.b-role-input').forEach(i => b += Math.max(0, parseInt(i.value) || 0));
+        document.querySelectorAll('.n-role-input').forEach(i => n += Math.max(0, parseInt(i.value) || 0));
+        document.getElementById('setup-total-red').innerText = r;
+        document.getElementById('setup-total-black').innerText = b;
+        document.getElementById('setup-total-neutral').innerText = n;
+        document.getElementById('setup-total-all').innerText = r + b + n;
     }
 
     function goBack(id) {
-        document.querySelectorAll('.container > div:not(#role-preview-modal)').forEach(d => d.classList.add('hidden'));
+        document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
     }
 
-    /* ---- ROLES CATALOG LOGIC (SPLIT) ---- */
-    function showRolesCatalog(sourceID) {
-        lastScreenID = sourceID; // Remember where we came from (setup or host lobby)
-        
-        const redList = document.getElementById('red-roles-list');
-        const blackList = document.getElementById('black-roles-list');
-        redList.innerHTML = "";
-        blackList.innerHTML = "";
-        
-        // Loop through all roles and distribute to columns
-        for (const roleName in roleData) {
-            const btn = document.createElement('button');
-            btn.className = 'role-item-btn';
-            
-            // Icon logic
-            let icon = "🕵️"; 
-            if(roleData[roleName].team === "ԿԱՐՄԻՐ") icon = "🔴";
-            else icon = "⚫";
-            
-            btn.innerText = `${icon} ${roleName}`;
-            
-            // Add color indicator border and click event
-            if(roleData[roleName].team === "ԿԱՐՄԻՐ") {
-                btn.style.borderLeft = "4px solid var(--red-team)";
-                btn.onclick = () => openRolePreview(roleName);
-                redList.appendChild(btn);
-            } else {
-                btn.style.borderLeft = "4px solid var(--black-team)";
-                btn.onclick = () => openRolePreview(roleName);
-                blackList.appendChild(btn);
-            }
+    function exitGameAndReset() {
+        if(confirm("Դուրս գա՞լ և ամբողջությամբ զրոյացնել սենյակը:")) {
+            if(currentRoomCode) {
+                db.ref('rooms/' + currentRoomCode).remove().then(() => { location.reload(); });
+            } else { location.reload(); }
         }
-        goBack('roles-catalog-panel');
     }
 
-    function openRolePreview(roleName) {
-        const d = roleData[roleName];
-        const html = `
-            <div class="role-card">
-                <div class="role-image-container"><img src="${d.img}" class="role-img"></div>
-                <div class="role-name-text">${roleName}</div>
-                <div class="desc-box">
-                    <b style="font-size:1.4em;">Թիմ՝ <span style="color:${d.team==='ԿԱՐՄԻՐ'?'var(--red-team)':'var(--black-team)'}">${d.team}</span></b>
-                    <p class="desc-text">${d.desc}</p>
-                </div>
-            </div>
-        `;
-        document.getElementById('preview-content').innerHTML = html;
-        document.getElementById('role-preview-modal').classList.remove('hidden');
+    function toggleCatalog() {
+        const overlay = document.getElementById('roles-catalog-overlay');
+        overlay.style.display = overlay.style.display === 'flex' ? 'none' : 'flex';
     }
-
-    function closePreview() {
-        document.getElementById('role-preview-modal').classList.add('hidden');
-    }
-    /* ----------------------------- */
-
-    function resetGame() { if(confirm("Զրոյացնե՞լ:")) location.reload(); }
 
     function startHost() {
+        isHost = true;
         let roles = [];
-        document.querySelectorAll('input[type="number"]').forEach(i => {
-            for(let k=0; k<(parseInt(i.value)||0); k++) roles.push(i.getAttribute('data-name'));
+        document.querySelectorAll('.role-count').forEach(i => {
+            let val = Math.max(0, parseInt(i.value) || 0);
+            for(let k=0; k<val; k++) roles.push(i.getAttribute('data-name'));
         });
         currentRoomCode = Math.floor(1000 + Math.random() * 9000).toString();
         document.getElementById('room-code-txt').innerText = currentRoomCode;
-        db.ref('rooms/' + currentRoomCode).set({ roles: roles, status: "waiting" });
+        db.ref('rooms/' + currentRoomCode).set({ roles: roles, voting: { state: "idle" } });
         goBack('host-lobby');
+        db.ref('rooms/' + currentRoomCode + '/players').on('value', snap => renderAdmin(snap.val()));
+        db.ref('rooms/' + currentRoomCode + '/voting').on('value', snap => updateAdminVotes(snap.val()));
+    }
 
-        db.ref('rooms/' + currentRoomCode + '/players').on('value', snap => {
-            const players = snap.val();
-            let html = "", adminList = "";
-            if(players) {
-                adminList = `<table class="admin-table"><tr><th>Խաղացող</th><th>Դերը</th></tr>`;
-                Object.values(players).forEach(p => {
-                    html += `<div class="player-tag">👤 ${p.name}</div>`;
-                    let clr = p.role === "սպասեք..." ? "#777" : (roleData[p.role]?.team === "ԿԱՐՄԻՐ" ? "var(--red-team)" : "var(--black-team)");
-                    adminList += `<tr><td>${p.name}</td><td><span class="role-badge" style="background:${clr}">${p.role}</span></td></tr>`;
-                });
-                adminList += `</table>`;
-                
-                let isDistributed = Object.values(players).some(p => p.role !== "սպասեք...");
-                if(isDistributed) {
-                    document.getElementById('admin-view-content').innerHTML = adminList;
-                } else {
-                    document.getElementById('player-list-display').innerHTML = html;
-                }
+    function renderAdmin(players) {
+        if(!players) { document.getElementById('player-list-admin').innerHTML = "<p>Սպասում ենք մասնակիցների...</p>"; return; }
+        let html = `<table class="admin-table">`;
+        Object.keys(players).forEach(id => {
+            let p = players[id];
+            let tm = roleData[p.role]?.team;
+            let clr = tm === "ԿԱՐՄԻՐ" ? "role-red-text" : (tm === "ՍԵՎ" ? "role-black-text" : "role-neutral-text");
+            html += `<tr><td>${p.name}</td><td class="${clr}">${p.role}</td><td style="text-align:right;">
+                <button class="candidate-btn" onclick="addCan('${id}', '${p.name}')">🗳️</button>
+                <button class="kick-btn" onclick="kick('${id}', '${p.name}', '${p.role}')">❌</button>
+            </td></tr>`;
+        });
+        document.getElementById('player-list-admin').innerHTML = html + `</table>`;
+        document.getElementById('vote-admin-area').classList.remove('hidden');
+    }
+
+    function kick(id, n, r) { 
+        if(confirm("Հեռացնե՞լ " + n)) { lastDeleted = {n, r}; db.ref('rooms/' + currentRoomCode + '/players/' + id).remove(); }
+    }
+
+    function undoLastAction() {
+        if(lastAddedCanId) { db.ref('rooms/' + currentRoomCode + '/voting/candidates/' + lastAddedCanId).remove(); lastAddedCanId = null; }
+        else if(lastDeleted) { db.ref('rooms/' + currentRoomCode + '/players').push({ name: lastDeleted.n, role: lastDeleted.r }); lastDeleted = null; }
+    }
+
+    function addCan(id, n) { lastAddedCanId = id; db.ref('rooms/' + currentRoomCode + '/voting/candidates/' + id).set({ name: n }); }
+
+    function toggleVotingState() {
+        db.ref('rooms/' + currentRoomCode + '/voting/state').once('value', snap => {
+            let currentState = snap.val();
+            if (currentState === "active") {
+                db.ref('rooms/' + currentRoomCode + '/voting/state').set("finished");
+            } else {
+                db.ref('rooms/' + currentRoomCode + '/voting').update({ state: "active", results: {} });
             }
         });
     }
 
-    function showJoinPanel() { goBack('join-panel'); }
+    function clearVoteData() { 
+        db.ref('rooms/' + currentRoomCode + '/voting').set({ state: "idle", candidates: {}, results: {} }); 
+        lastAddedCanId = null; 
+    }
+
+    function updateAdminVotes(v) {
+        const btn = document.getElementById('host-vote-control-btn');
+        if(v && v.state === "active") { btn.innerText = "ԱՎԱՐՏԵԼ ՔՎԵԱՐԿՈՒԹՅՈՒՆԸ 🛑"; btn.classList.add('stop-btn'); }
+        else if (v && v.state === "finished") { btn.innerText = "ԱՎԱՐՏՎԱԾ Է ✅"; btn.disabled = true; btn.classList.remove('stop-btn'); }
+        else { btn.innerText = "ՍԿՍԵԼ"; btn.disabled = false; btn.classList.remove('stop-btn'); }
+
+        if(!v || !v.candidates) { document.getElementById('candidate-list-admin').innerHTML = ""; return; }
+        let html = "", counts = {};
+        if(v.results) Object.values(v.results).forEach(cid => counts[cid] = (counts[cid] || 0) + 1);
+        Object.keys(v.candidates).forEach(cid => {
+            html += `<div class="candidate-row"><span>👤 ${v.candidates[cid].name}</span> <b>${counts[cid] || 0} ձայն</b></div>`;
+        });
+        document.getElementById('candidate-list-admin').innerHTML = html;
+    }
 
     function joinNow() {
         let c = document.getElementById('join-code').value, n = document.getElementById('p-name').value;
         if(!c || !n) return alert("Լրացրեք դաշտերը");
-        let pRef = db.ref('rooms/' + c + '/players').push();
-        pRef.set({ name: n, role: "սպասեք..." });
-        goBack('role-display-panel');
-
-        pRef.on('value', snap => {
-            const p = snap.val();
-            if(p && p.role !== "սպասեք...") {
-                const d = roleData[p.role];
-                document.getElementById('role-display-panel').innerHTML = `
-                    <h2 style="margin-bottom:0;">${n}</h2>
-                    <div class="role-card">
-                        <div class="role-image-container"><img src="${d.img}" class="role-img"></div>
-                        <div style="color:#888; font-size:1.1em;">Ձեր գաղտնի դերն է</div>
-                        <div class="role-name-text">${p.role}</div>
-                        
-                        <div class="desc-box">
-                            <b style="font-size:1.4em;">Թիմ՝ <span style="color:${d.team==='ԿԱՐՄԻՐ'?'var(--red-team)':'var(--black-team)'}">${d.team}</span></b>
-                            <p class="desc-text">${d.desc}</p>
-                        </div>
-                    </div>
-                `;
-            } else {
-                document.getElementById('role-display-panel').innerHTML = `<h3>Ողջույն ${n}</h3><p style="color:var(--gold); font-size:1.2em;">Սպասեք խաղավարին...</p>`;
-            }
+        localStorage.setItem('mafia_player_name', n);
+        db.ref('rooms/' + c).once('value', snap => {
+            if(!snap.exists()) return alert("Սենյակը չկա");
+            currentRoomCode = c;
+            let pRef = db.ref('rooms/' + c + '/players').push();
+            myId = pRef.key; pRef.set({ name: n, role: "սպասեք..." });
+            goBack('role-display-panel');
+            pRef.on('value', ps => { if(!ps.exists()) location.reload(); else renderInfo(ps.val(), n); });
+            db.ref('rooms/' + c + '/voting').on('value', vs => renderVoteModal(vs.val()));
         });
     }
 
-    function shuffleArray(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
+    function renderInfo(p, name) {
+        if(p.role === "սպասեք...") { document.getElementById('player-role-info').innerHTML = `<h3>Ողջույն ${name}</h3><p>Սպասեք խաղավարին...</p>`; return; }
+        const d = roleData[p.role];
+        let tmColor = d.team === 'ԿԱՐՄԻՐ' ? 'var(--red-team)' : (d.team === 'ՍԵՎ' ? 'var(--blue-team)' : 'var(--neutral-team)');
+        document.getElementById('player-role-info').innerHTML = `
+            <h2 style="margin-bottom:5px;">${name}</h2>
+            <div class="role-card">
+                <div class="role-image-container"><img src="${d.img}" class="role-img"></div>
+                <div class="role-name-text">${p.role}</div>
+                <div class="desc-box"><b>Թիմ՝ <span style="color:${tmColor}">${d.team}</span></b><p class="desc-text">${d.desc}</p></div>
+            </div>`;
     }
+
+    function renderVoteModal(v) {
+        const overlay = document.getElementById('vote-modal-overlay');
+        const listArea = document.getElementById('candidate-list-player');
+        const resultsArea = document.getElementById('vote-results-player');
+        const title = document.getElementById('player-vote-title');
+
+        if(!v || v.state === "idle") { overlay.style.display = 'none'; return; }
+        overlay.style.display = 'flex';
+
+        if (v.state === "active") {
+            title.innerText = "🗳️ ՔՎԵԱՐԿՈՒԹՅՈՒՆ";
+            resultsArea.classList.add('hidden');
+            listArea.classList.remove('hidden');
+            if(v.results && v.results[myId]) {
+                listArea.innerHTML = "<p style='color:var(--gold); font-size:1.4em;'>Ձեր քվեն ընդունված է, սպասեք ավարտին:</p>";
+            } else {
+                let h = "";
+                if(v.candidates) Object.keys(v.candidates).forEach(cid => { h += `<button class="host-btn" style="background:#333; margin-bottom:10px;" onclick="castVote('${cid}')">${v.candidates[cid].name}</button>`; });
+                listArea.innerHTML = h || "Թեկնածուներ չկան";
+            }
+        } else if (v.state === "finished") {
+            title.innerText = "📊 ԱՐԴՅՈՒՆՔՆԵՐ";
+            listArea.classList.add('hidden');
+            resultsArea.classList.remove('hidden');
+            let h = "", counts = {};
+            if(v.results) Object.values(v.results).forEach(cid => counts[cid] = (counts[cid] || 0) + 1);
+            Object.keys(v.candidates).forEach(cid => {
+                h += `<div class="vote-result-row"><span>👤 ${v.candidates[cid].name}</span> <b>${counts[cid] || 0}</b></div>`;
+            });
+            resultsArea.innerHTML = h;
+        }
+    }
+
+    function castVote(cid) { db.ref('rooms/' + currentRoomCode + '/voting/results/' + myId).set(cid); }
 
     function distributeFinal() {
         db.ref('rooms/' + currentRoomCode).once('value', snap => {
-            let data = snap.val();
-            if(!data || !data.players) return alert("Մասնակիցներ չկան");
-            
-            let keys = Object.keys(data.players);
-            let roles = [...data.roles];
-            
+            let data = snap.val(), keys = shuffle(Object.keys(data.players)), roles = shuffle([...data.roles]);
             while(roles.length < keys.length) roles.push("Քաղաքացի");
-            
-            roles = shuffleArray(roles); 
-            keys = shuffleArray(keys);   
-            
-            let updates = {};
-            keys.forEach((k, i) => {
-                updates[k + '/role'] = roles[i];
-            });
-            
-            db.ref('rooms/' + currentRoomCode + '/players').update(updates);
+            keys.forEach((k, i) => db.ref('rooms/' + currentRoomCode + '/players/' + k).update({ role: roles[i] }));
+            document.getElementById('dist-btn').style.display = "none";
         });
     }
-    calculate();
+
+    function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+    function initCatalog() {
+        const rList = document.getElementById('red-cat-list');
+        const bList = document.getElementById('black-cat-list');
+        const nList = document.getElementById('neutral-cat-list');
+        
+        const rInp = document.getElementById('setup-red-inputs');
+        const bInp = document.getElementById('setup-black-inputs');
+        const nInp = document.getElementById('setup-neutral-inputs');
+
+        for(let r in roleData) {
+            const tm = roleData[r].team;
+            let targetList = rList, targetInp = rInp, inputClass = 'r-role-input', colorVar = 'var(--red-team)';
+            
+            if (tm === "ՍԵՎ") { 
+                targetList = bList; targetInp = bInp; inputClass = 'b-role-input'; colorVar = 'var(--blue-team)'; 
+            } else if (tm === "ՉԵԶՈՔ") { 
+                targetList = nList; targetInp = nInp; inputClass = 'n-role-input'; colorVar = 'var(--neutral-team)'; 
+            }
+
+            const pill = document.createElement('div'); pill.className = `role-pill`; 
+            pill.style.borderLeft = `4px solid ${colorVar}`;
+            pill.innerHTML = `<span>${r}</span> <span>➜</span>`;
+            pill.onclick = () => {
+                const d = roleData[r];
+                let descColor = d.team === "ԿԱՐՄԻՐ" ? "var(--red-team)" : (d.team === "ՍԵՎ" ? "var(--blue-team)" : "var(--neutral-team)");
+                document.getElementById('preview-content').innerHTML = `<div class="role-card"><div class="role-image-container"><img src="${d.img}" class="role-img"></div><div class="role-name-text">${r}</div><div class="desc-box"><b style="color:${descColor}">${d.team}</b><p class="desc-text">${d.desc}</p></div></div>`;
+                document.getElementById('role-preview-modal').classList.remove('hidden');
+            };
+            targetList.appendChild(pill);
+
+            const row = document.createElement('div'); row.className = 'role-row';
+            row.innerHTML = `<label>${r}</label><input type="number" min="0" class="role-count ${inputClass}" data-name="${r}" value="${['Շերիֆ','Բժիշկ','Մաֆիա','Դոն'].includes(r) ? 1 : 0}" oninput="calculate()">`;
+            targetInp.appendChild(row);
+        }
+        calculate();
+    }
+    function closePreview() { document.getElementById('role-preview-modal').classList.add('hidden'); }
+    function showJoinPanel() { goBack('join-panel'); }
+    initCatalog();
 </script>
 </body>
 </html>
